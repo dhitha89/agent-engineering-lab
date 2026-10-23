@@ -1,131 +1,176 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body><title>Agent Engineering Track</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,750&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;600;700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: engineering logbook — control strip, progress rail, then ten numbered modules (a true sequence) that expand into notes, sources and a build task. */
+/* Layout: light study notebook. Hero + settings card, then an "agent trace" rail (the signature: 11 nodes, filled as you finish),
+   then module cards tinted with the same four pastels your infographics use. Single light theme by choice. */
 :root{
-  --bg:#F3F5F4; --surface:#FFFFFF; --ink:#16201E; --muted:#5B6A66; --line:#D9E0DD;
-  --accent:#1F6F5C; --accent-soft:#E1EFEA; --warn:#A5531B; --done:#2E7D4F;
-  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
-  --f-body:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
-  --f-mono:"IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  color-scheme:light;
+  --paper:#FAFBFD; --card:#FFFFFF; --ink:#1A2233; --muted:#667085; --line:#E3E7EF;
+  --cobalt:#3554D1; --cobalt-soft:#EAEFFD;
+  --sky:#E9F2FE; --mint:#E5F5EE; --butter:#FFF5DA; --lilac:#F0EBFC;
+  --sky-ink:#2D6BC4; --mint-ink:#1F8A5B; --butter-ink:#A87412; --lilac-ink:#6E4FC9;
+  --f-display:"Familjen Grotesk","Segoe UI",system-ui,sans-serif;
+  --f-body:"Instrument Sans","Segoe UI",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#111816; --surface:#18211F; --ink:#E4ECE9; --muted:#97A7A2; --line:#2A3633;
-  --accent:#5CC0A3; --accent-soft:#1D332D; --warn:#E39A62; --done:#6CCB8F; color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#111816; --surface:#18211F; --ink:#E4ECE9; --muted:#97A7A2; --line:#2A3633;
-  --accent:#5CC0A3; --accent-soft:#1D332D; --warn:#E39A62; --done:#6CCB8F; color-scheme:dark}
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--f-body);margin:0}
-.wrap{max-width:980px;margin:0 auto;padding-block:28px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:28px}
-h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:-.01em}
-h1{font-size:clamp(28px,5vw,42px);font-weight:750;line-height:1.08}
-h2{font-size:22px;font-weight:700}
-h3{font-size:18px;font-weight:650}
-a{color:var(--accent)}
-a:focus-visible,button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
-.eyebrow{font:500 12px/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.lede{max-width:66ch;color:var(--muted);margin:10px 0 0}
+body{margin:0;background:var(--paper);color:var(--ink);font:15.5px/1.6 var(--f-body);
+  background-image:radial-gradient(circle at 1px 1px,#E6EAF2 1px,transparent 0);background-size:22px 22px}
+.wrap{max-width:1040px;margin:0 auto;padding-block:36px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:34px}
+h1,h2,h3{font-family:var(--f-display);margin:0;text-wrap:balance;letter-spacing:-.015em}
+h1{font-size:clamp(34px,6vw,56px);font-weight:700;line-height:1.02}
+h1 em{font-style:normal;color:var(--cobalt)}
+h2{font-size:24px;font-weight:650}
+h3{font-size:19px;font-weight:600}
+a{color:var(--cobalt);text-underline-offset:3px}
+:focus-visible{outline:2px solid var(--cobalt);outline-offset:2px;border-radius:6px}
+.label{font:500 11.5px/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
-header{display:flex;flex-direction:column;gap:8px}
-.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
-.controls>div{background:var(--surface);padding:14px 16px;display:flex;flex-direction:column;gap:6px;min-width:0}
-.controls label{font:500 11px/1 var(--f-mono);letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
-.controls input{font:500 15px var(--f-mono);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px 8px;width:100%}
-.controls .big{font:600 22px/1.1 var(--f-mono);font-variant-numeric:tabular-nums}
-.rail{display:flex;flex-direction:column;gap:8px}
-.bar{height:10px;background:var(--line);border-radius:99px;overflow:hidden}
-.bar>i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
-.railtxt{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
-.project{background:var(--accent-soft);border-radius:10px;padding:16px 18px;display:flex;flex-direction:column;gap:6px}
+
+/* hero */
+.hero{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:32px;align-items:end}
+.hero-text{display:flex;flex-direction:column;gap:14px;min-width:0}
+.hero-text p{margin:0;color:var(--muted);max-width:56ch;font-size:16.5px}
+.settings{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;display:grid;grid-template-columns:1fr 1fr;gap:14px 16px;box-shadow:0 1px 2px rgba(26,34,51,.04),0 8px 24px -12px rgba(26,34,51,.12)}
+.settings>div{display:flex;flex-direction:column;gap:6px;min-width:0}
+.settings input{font:500 15px var(--f-mono);color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%}
+.settings .val{font:600 24px/1.1 var(--f-display);letter-spacing:-.01em}
+.settings .val small{font:500 13px var(--f-body);color:var(--muted);letter-spacing:0}
+
+/* signature: trace rail */
+.trace{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 18px 14px;display:flex;flex-direction:column;gap:14px}
+.trace-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.trace-head b{font:600 15px var(--f-display)}
+.trace-scroll{overflow-x:auto;padding-bottom:4px}
+.nodes{display:grid;grid-template-columns:repeat(11,minmax(64px,1fr));min-width:700px;position:relative}
+.nodes::before{content:"";position:absolute;left:32px;right:32px;top:15px;height:2px;background:var(--line)}
+.nodes .fill{position:absolute;left:32px;top:15px;height:2px;background:var(--cobalt);width:0;transition:width .4s ease}
+.node{position:relative;display:flex;flex-direction:column;align-items:center;gap:8px;background:none;border:0;padding:0;cursor:pointer;color:var(--ink);font:inherit}
+.dot{width:32px;height:32px;border-radius:50%;border:2px solid var(--line);background:var(--card);display:grid;place-items:center;font:500 11px var(--f-mono);color:var(--muted);transition:all .25s}
+.node[data-s="part"] .dot{border-color:var(--cobalt);color:var(--cobalt);background:var(--cobalt-soft)}
+.node[data-s="full"] .dot{border-color:var(--cobalt);background:var(--cobalt);color:#fff}
+.node span.nm{font-size:12px;line-height:1.25;text-align:center;color:var(--muted);max-width:86px}
+.node:hover span.nm{color:var(--ink)}
+.trace-foot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;font-size:13.5px;color:var(--muted)}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.btn{font:500 13px var(--f-body);background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:6px 14px;cursor:pointer}
+.btn:hover{border-color:var(--cobalt);color:var(--cobalt)}
+
+/* project */
+.project{display:grid;grid-template-columns:auto minmax(0,1fr);gap:18px;align-items:start;padding:20px 22px;border-radius:16px;background:var(--cobalt-soft);border:1px solid #D6DFFB}
+.project .tag{font:500 11.5px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--cobalt);padding-top:4px;white-space:nowrap}
+.project div{display:flex;flex-direction:column;gap:6px;min-width:0}
 .project p{margin:0;max-width:72ch}
-.modules{display:flex;flex-direction:column;gap:10px}
-details.mod{background:var(--surface);border:1px solid var(--line);border-radius:10px}
-details.mod[open]{border-color:var(--accent)}
-summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:52px 1fr auto;gap:14px;align-items:center;padding:14px 16px}
+.project .tip{font-size:13.5px;color:var(--muted)}
+
+/* modules */
+.modules{display:flex;flex-direction:column;gap:12px}
+details.mod{--tint:var(--sky);--tink:var(--sky-ink);background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;transition:box-shadow .2s}
+details.mod:nth-child(4n+2){--tint:var(--mint);--tink:var(--mint-ink)}
+details.mod:nth-child(4n+3){--tint:var(--butter);--tink:var(--butter-ink)}
+details.mod:nth-child(4n+4){--tint:var(--lilac);--tink:var(--lilac-ink)}
+details.mod[open]{box-shadow:0 10px 30px -16px rgba(26,34,51,.25)}
+summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:16px;align-items:center;padding:16px 18px}
 summary::-webkit-details-marker{display:none}
-.num{font:600 22px/1 var(--f-mono);color:var(--accent)}
-.sumtxt{min-width:0;display:flex;flex-direction:column;gap:3px}
-.sumtxt .meta{font-size:13px;color:var(--muted)}
-.pill{font:500 12px/1 var(--f-mono);padding:6px 9px;border-radius:99px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
-.pill.part{color:var(--warn);border-color:var(--warn)}
-.pill.full{color:var(--surface);background:var(--done);border-color:var(--done)}
-.body{padding:4px 16px 18px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,300px);gap:24px;border-top:1px solid var(--line)}
-.col{display:flex;flex-direction:column;gap:16px;min-width:0;padding-top:14px}
-.goal{font-size:16px;margin:0}
-ul.concepts{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
-.res{display:flex;flex-direction:column;gap:2px;margin:0;padding:0;list-style:none}
-.res li{display:grid;grid-template-columns:22px 72px 1fr auto;gap:8px;align-items:baseline;padding:7px 0;border-bottom:1px dashed var(--line)}
+.badge{width:48px;height:48px;border-radius:12px;background:var(--tint);color:var(--tink);display:grid;place-items:center;font:700 20px var(--f-display)}
+.sumtxt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.sumtxt .meta{font-size:13.5px;color:var(--muted)}
+.state{font:500 12px/1 var(--f-mono);padding:7px 11px;border-radius:999px;background:var(--paper);border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.state.part{background:var(--cobalt-soft);border-color:#CFD9FA;color:var(--cobalt)}
+.state.full{background:var(--cobalt);border-color:var(--cobalt);color:#fff}
+.body{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,310px);gap:28px;padding:6px 18px 22px;border-top:1px solid var(--line)}
+.col{display:flex;flex-direction:column;gap:18px;padding-top:16px;min-width:0}
+.goal{margin:0;font-size:17px;line-height:1.5}
+.concepts{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 0;padding:0;list-style:none}
+.concepts li{background:var(--tint);color:var(--ink);font-size:13.5px;padding:5px 10px;border-radius:8px}
+.res{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column}
+.res li{display:grid;grid-template-columns:20px 64px minmax(0,1fr) auto;gap:10px;align-items:baseline;padding:9px 0;border-bottom:1px solid var(--line)}
 .res li:last-child{border-bottom:0}
-.kind{font:500 11px/1 var(--f-mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
-.res a{min-width:0;overflow-wrap:anywhere}
+.kind{font:500 10.5px var(--f-mono);letter-spacing:.07em;text-transform:uppercase;color:var(--tink)}
+.res a{overflow-wrap:anywhere}
 .mins{font:400 12px var(--f-mono);color:var(--muted);white-space:nowrap}
-input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px;margin:0;translate:0 2px}
-.task{border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
-.task label{display:flex;gap:10px;align-items:flex-start;font-weight:500}
-.task p{margin:0}
-.task .dw{color:var(--muted);font-size:14px}
-figure{margin:0;display:flex;flex-direction:column;gap:6px}
-figure button{padding:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff;cursor:zoom-in}
+input[type=checkbox]{accent-color:var(--cobalt);width:16px;height:16px;margin:0;translate:0 2px}
+.task{background:var(--paper);border:1px dashed #C9D0DD;border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.task label{display:flex;gap:10px;align-items:flex-start}
+.task label b{font-weight:600}
+.task p{margin:0;font-size:14px;color:var(--muted)}
+figure{margin:0;display:flex;flex-direction:column;gap:6px;position:sticky;top:16px}
+figure button{padding:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;cursor:zoom-in}
 figure img{display:block;width:100%}
 figcaption{font-size:12px;color:var(--muted)}
-.sched{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
-table{border-collapse:collapse;width:100%;font-size:14px;min-width:520px}
-th,td{text-align:left;padding:9px 14px;border-bottom:1px solid var(--line)}
-th{font:500 11px var(--f-mono);letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+
+/* capstone + schedule */
+.capstone{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 22px;display:flex;flex-direction:column;gap:12px}
+.capstone ol{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+.capstone label{display:flex;gap:10px;align-items:flex-start}
+.sched-wrap{display:flex;flex-direction:column;gap:12px}
+.sched{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:16px}
+table{border-collapse:collapse;width:100%;min-width:540px;font-size:14px}
+th,td{text-align:left;padding:10px 16px;border-bottom:1px solid var(--line)}
+th{font:500 11px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:var(--paper)}
 td.mono{white-space:nowrap}
 tr:last-child td{border-bottom:0}
-.capstone{display:flex;flex-direction:column;gap:10px}
-.capstone ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
-.foot{font-size:13px;color:var(--muted);max-width:75ch}
-.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-.btn{font:500 13px var(--f-body);background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:6px 12px;cursor:pointer}
-.btn:hover{border-color:var(--accent)}
+tr.now td{background:var(--cobalt-soft)}
+.foot{font-size:13px;color:var(--muted);max-width:78ch;margin:0}
 dialog{border:0;padding:0;background:transparent;max-width:min(94vw,820px)}
-dialog::backdrop{background:rgba(0,0,0,.7)}
-dialog img{max-height:90vh;width:auto;max-width:100%;border-radius:8px;display:block;margin:auto}
-@media (max-width:720px){.body{grid-template-columns:1fr}.res li{grid-template-columns:22px 1fr auto}.res .kind{display:none}summary{grid-template-columns:40px 1fr}summary .pill{grid-column:2;justify-self:start}}
-@media (prefers-reduced-motion:reduce){.bar>i{transition:none}}
+dialog::backdrop{background:rgba(26,34,51,.55)}
+dialog img{max-height:90vh;width:auto;max-width:100%;border-radius:12px;display:block;margin:auto}
+@media (max-width:760px){
+  .hero{grid-template-columns:1fr;gap:20px}
+  .body{grid-template-columns:1fr}
+  figure{position:static}
+  summary{grid-template-columns:42px minmax(0,1fr)}
+  .badge{width:42px;height:42px;font-size:17px}
+  summary .state{grid-column:2;justify-self:start}
+  .res li{grid-template-columns:20px minmax(0,1fr) auto}
+  .res .kind{display:none}
+  .project{grid-template-columns:1fr;gap:6px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
 <div class="wrap">
-  <header>
-    <span class="eyebrow">Study plan · 10 modules + capstone</span>
-    <h1>Agent Engineering Track</h1>
-    <p class="lede">The ten skills from your saved infographics, in order, each with the best free courses, articles and videos, an hour estimate, and one build step for a single portfolio project. Tick items as you go; your progress stays in this browser. Set your start date and weekly hours and the schedule recalculates.</p>
-  </header>
-
-  <section class="controls" aria-label="Plan settings">
-    <div><label for="start">Start date</label><input id="start" type="date"></div>
-    <div><label for="hpw">Hours per week</label><input id="hpw" type="number" min="2" max="40" step="1"></div>
-    <div><label>Total effort</label><span class="big" id="total"></span></div>
-    <div><label>Estimated finish</label><span class="big" id="finish"></span></div>
+  <section class="hero">
+    <div class="hero-text">
+      <span class="label">10 modules · 1 build project · capstone</span>
+      <h1>From knowing agents to <em>building</em> them</h1>
+      <p>Ten core skills in order. Each one has free courses, articles and talks, a time estimate, and one step that adds a layer to your project. Tick things off as you go; progress is saved in this browser.</p>
+    </div>
+    <div class="settings" aria-label="Plan settings">
+      <div><label class="label" for="start">Start date</label><input id="start" type="date"></div>
+      <div><label class="label" for="hpw">Hours per week</label><input id="hpw" type="number" min="2" max="40" step="1"></div>
+      <div><span class="label">Total effort</span><span class="val" id="total"></span></div>
+      <div><span class="label">You finish</span><span class="val" id="finish"></span></div>
+    </div>
   </section>
 
-  <section class="rail" aria-label="Progress">
-    <div class="bar"><i id="barfill"></i></div>
-    <div class="railtxt"><span id="progtxt"></span><span class="row"><button class="btn" id="expand" type="button">Expand all</button><button class="btn" id="reset" type="button">Clear ticks</button></span></div>
+  <section class="trace" aria-label="Progress">
+    <div class="trace-head"><b>Your run so far</b><span class="label" id="progtxt"></span></div>
+    <div class="trace-scroll"><div class="nodes" id="nodes"><i class="fill" id="fill"></i></div></div>
+    <div class="trace-foot"><span>Each node is a module. Click one to open it.</span><span class="btns"><button class="btn" id="expand" type="button">Expand all</button><button class="btn" id="reset" type="button">Clear ticks</button></span></div>
   </section>
 
   <section class="project">
-    <span class="eyebrow">Running project</span>
-    <h3 id="pname"></h3>
-    <p id="ppitch"></p>
-    <p class="foot">Tip: start a basic Langfuse container in week 1 even though Observability is module 10. Having traces from day one makes every later module easier to debug.</p>
+    <span class="tag">The project</span>
+    <div>
+      <h3 id="pname"></h3>
+      <p id="ppitch"></p>
+      <p class="tip">Start a Langfuse container in week 1, even though tracing is module 10. Traces from day one make every later module easier to debug.</p>
+    </div>
   </section>
 
   <section class="modules" id="modules" aria-label="Modules"></section>
 
   <section class="capstone" id="cap"></section>
 
-  <section style="display:flex;flex-direction:column;gap:12px">
+  <section class="sched-wrap">
     <h2>Schedule</h2>
     <div class="sched"><table><thead><tr><th>#</th><th>Module</th><th>Hours</th><th>Starts</th><th>Ends</th></tr></thead><tbody id="schedbody"></tbody></table></div>
   </section>
 
-  <p class="foot">Hour estimates = listed material plus the build step. Links marked ✓ were checked live on 23 Oct 2026. Other links are long-standing official pages; YouTube entries open a search so you can pick the newest upload of that talk. Course durations are approximate.</p>
+  <p class="foot">Hours = the listed material plus the build step. Links marked ✓ were checked live on 23 Oct 2026; the others are long-standing official pages. YouTube entries open a search so you get the latest upload of each talk. Course lengths are approximate.</p>
 </div>
 
 <dialog id="zoom"><img id="zoomimg" alt=""></dialog>
@@ -139,62 +184,74 @@ try{st=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){st={}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}}
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const fmt=d=>d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+const fmt=d=>d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+const fmtY=d=>d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
 const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const nextMonday=()=>{const d=new Date();d.setHours(0,0,0,0);const k=(8-d.getDay())%7||7;d.setDate(d.getDate()+k);return d};
 $('#start').value=st.start||iso(nextMonday());
 $('#hpw').value=st.hpw||6;
 $('#pname').textContent=DATA.project.name;
 $('#ppitch').textContent=DATA.project.pitch;
+const short={1:'Harness',2:'Loop',3:'Context',4:'Tools',5:'Memory',6:'Orchestration',7:'Guardrails',8:'Evals',9:'Human in loop',10:'Tracing'};
+
+const nodes=$('#nodes');
+DATA.topics.forEach(t=>{const b=document.createElement('button');b.type='button';b.className='node';b.id='n'+t.n;b.dataset.open='m'+t.n;b.innerHTML=`<span class="dot">${String(t.n).padStart(2,'0')}</span><span class="nm">${short[t.n]}</span>`;nodes.appendChild(b)});
+{const b=document.createElement('button');b.type='button';b.className='node';b.id='nC';b.dataset.open='cap';b.innerHTML=`<span class="dot">C</span><span class="nm">Capstone</span>`;nodes.appendChild(b)}
 
 const mods=$('#modules');
 DATA.topics.forEach(t=>{
   const d=document.createElement('details');d.className='mod';d.id='m'+t.n;
-  const res=t.resources.map((r,i)=>`<li><input type="checkbox" id="r${t.n}_${i}" data-k="r${t.n}_${i}" aria-label="Done: ${esc(r.t)}"><span class="kind">${r.k}</span><a href="${esc(r.u)}" target="_blank" rel="noopener">${esc(r.t)}${r.v?' ✓':''}</a><span class="mins">~${r.m>=60?(r.m/60).toFixed(r.m%60?1:0)+' h':r.m+' min'}</span></li>`).join('');
-  d.innerHTML=`<summary><span class="num">${String(t.n).padStart(2,'0')}</span><span class="sumtxt"><h3>${esc(t.title)}</h3><span class="meta" id="meta${t.n}"></span></span><span class="pill" id="pill${t.n}"></span></summary>
+  const res=t.resources.map((r,i)=>`<li><input type="checkbox" id="r${t.n}_${i}" data-k="r${t.n}_${i}" aria-label="Done: ${esc(r.t)}"><span class="kind">${r.k}</span><a href="${esc(r.u)}" target="_blank" rel="noopener">${esc(r.t)}${r.v?' ✓':''}</a><span class="mins">${r.m>=60?(r.m/60).toFixed(r.m%60?1:0)+' h':r.m+' min'}</span></li>`).join('');
+  d.innerHTML=`<summary><span class="badge">${t.n}</span><span class="sumtxt"><h3>${esc(t.title)}</h3><span class="meta" id="meta${t.n}"></span></span><span class="state" id="pill${t.n}"></span></summary>
   <div class="body"><div class="col">
     <p class="goal">${esc(t.goal)}</p>
-    <div><span class="eyebrow">Key concepts</span><ul class="concepts">${t.concepts.map(c=>`<li>${esc(c)}</li>`).join('')}</ul></div>
-    <div><span class="eyebrow">Learn</span><ul class="res">${res}</ul></div>
-    <div class="task"><label><input type="checkbox" id="b${t.n}" data-k="b${t.n}"><span>Build: ${esc(t.build)}</span></label><p class="dw"><strong>Done when:</strong> ${esc(t.done)}</p></div>
+    <div><span class="label">Key ideas</span><ul class="concepts">${t.concepts.map(c=>`<li>${esc(c)}</li>`).join('')}</ul></div>
+    <div><span class="label">Learn</span><ul class="res">${res}</ul></div>
+    <div class="task"><label><input type="checkbox" id="b${t.n}" data-k="b${t.n}"><span><b>Build:</b> ${esc(t.build)}</span></label><p><b>Done when:</b> ${esc(t.done)}</p></div>
   </div><div class="col">
-    <figure><button type="button" data-zoom="${t.slug}" aria-label="Enlarge ${esc(t.title)} infographic"><img src="${IMGS[t.slug]}" alt="${esc(t.title)} infographic"></button><figcaption>Your saved infographic · tap to enlarge</figcaption></figure>
+    <figure><button type="button" data-zoom="${t.slug}" aria-label="Enlarge the ${esc(t.title)} infographic"><img src="${IMGS[t.slug]}" alt="${esc(t.title)} infographic" loading="lazy"></button><figcaption>Your saved infographic · tap to enlarge</figcaption></figure>
   </div></div>`;
   mods.appendChild(d);
 });
 const cap=DATA.capstone;
-$('#cap').innerHTML=`<h2>${esc(cap.title)} <span class="mono" style="font-size:15px;color:var(--muted)">· ${cap.hours} h</span></h2><ol>${cap.steps.map((s,i)=>`<li><label style="display:flex;gap:10px"><input type="checkbox" id="c${i}" data-k="c${i}"><span>${esc(s)}</span></label></li>`).join('')}</ol>`;
+$('#cap').innerHTML=`<div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline"><h2>Capstone: ship it and write it up</h2><span class="label">${cap.hours} h</span></div><ol>${cap.steps.map((s,i)=>`<li><label><input type="checkbox" id="c${i}" data-k="c${i}"><span>${esc(s)}</span></label></li>`).join('')}</ol>`;
 
 document.querySelectorAll('input[type=checkbox]').forEach(cb=>{cb.checked=!!st[cb.dataset.k];cb.addEventListener('change',()=>{st[cb.dataset.k]=cb.checked;save();render()})});
 ['start','hpw'].forEach(id=>$('#'+id).addEventListener('input',()=>{st[id]=$('#'+id).value;save();render()}));
-$('#reset').addEventListener('click',e=>{const b=e.currentTarget;if(b.dataset.arm){Object.keys(st).forEach(k=>{if(/^[rbc]/.test(k))delete st[k]});save();document.querySelectorAll('input[type=checkbox]').forEach(c=>c.checked=false);b.textContent='Clear ticks';delete b.dataset.arm;render()}else{b.dataset.arm=1;b.textContent='Tap again to clear';setTimeout(()=>{b.textContent='Clear ticks';delete b.dataset.arm},3000)}});
+$('#reset').addEventListener('click',e=>{const b=e.currentTarget;if(b.dataset.arm){Object.keys(st).forEach(k=>{if(/^[rbc]\d/.test(k))delete st[k]});save();document.querySelectorAll('input[type=checkbox]').forEach(c=>c.checked=false);b.textContent='Clear ticks';delete b.dataset.arm;render()}else{b.dataset.arm=1;b.textContent='Click again to clear';setTimeout(()=>{b.textContent='Clear ticks';delete b.dataset.arm},3000)}});
 $('#expand').addEventListener('click',e=>{const all=[...document.querySelectorAll('details.mod')];const open=!all.every(d=>d.open);all.forEach(d=>d.open=open);e.currentTarget.textContent=open?'Collapse all':'Expand all'});
-document.addEventListener('click',e=>{const z=e.target.closest('[data-zoom]');if(z){$('#zoomimg').src=IMGS[z.dataset.zoom];$('#zoom').showModal()}});
+document.addEventListener('click',e=>{
+  const z=e.target.closest('[data-zoom]');if(z){$('#zoomimg').src=IMGS[z.dataset.zoom];$('#zoomimg').alt=z.getAttribute('aria-label');$('#zoom').showModal();return}
+  const o=e.target.closest('[data-open]');if(o){const el=document.getElementById(o.dataset.open);if(el){if(el.tagName==='DETAILS')el.open=true;el.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'})}}
+});
 $('#zoom').addEventListener('click',()=>$('#zoom').close());
 
 function render(){
   const hpw=Math.max(1,+$('#hpw').value||6);
-  let start=new Date(($('#start').value||iso(nextMonday()))+'T00:00:00');
-  if(isNaN(start))start=nextMonday();
-  const items=[...DATA.topics.map(t=>({n:String(t.n).padStart(2,'0'),title:t.title,h:t.hours,id:'m'+t.n})),{n:'C',title:cap.title.split(':')[0],h:cap.hours}];
-  const total=items.reduce((a,b)=>a+b.h,0);
-  let cum=0;const perDay=hpw/7;let rows='';
+  let start=new Date(($('#start').value||iso(nextMonday()))+'T00:00:00');if(isNaN(start))start=nextMonday();
+  const items=[...DATA.topics.map(t=>({n:String(t.n).padStart(2,'0'),title:t.title,h:t.hours,id:'m'+t.n})),{n:'C',title:'Capstone',h:cap.hours,id:'cap'}];
+  const total=items.reduce((a,b)=>a+b.h,0);const perDay=hpw/7;let cum=0;
+  const today=new Date();today.setHours(0,0,0,0);let rows='';
   items.forEach(it=>{const s=new Date(start);s.setDate(s.getDate()+Math.floor(cum/perDay));cum+=it.h;const e=new Date(start);e.setDate(e.getDate()+Math.ceil(cum/perDay)-1);it.s=s;it.e=e;
-    rows+=`<tr><td class="mono">${it.n}</td><td>${it.id?`<a href="#${it.id}" data-open="${it.id}">${esc(it.title)}</a>`:esc(it.title)}</td><td class="mono">${it.h} h</td><td class="mono">${fmt(s)}</td><td class="mono">${fmt(e)}</td></tr>`});
+    const now=today>=s&&today<=e;
+    rows+=`<tr class="${now?'now':''}"><td class="mono">${it.n}</td><td><a href="#${it.id}" data-open="${it.id}">${esc(it.title)}</a>${now?' <span class="label" style="color:var(--cobalt)">· now</span>':''}</td><td class="mono">${it.h} h</td><td class="mono">${fmtY(s)}</td><td class="mono">${fmtY(e)}</td></tr>`});
   $('#schedbody').innerHTML=rows;
-  $('#total').textContent=total+' h';
-  $('#finish').textContent=fmt(items[items.length-1].e);
-  let done=0,all=0;
+  $('#total').innerHTML=`${total} <small>hours</small>`;
+  $('#finish').textContent=fmtY(items[items.length-1].e);
+  let done=0,all=0,lastFull=-1;
   DATA.topics.forEach((t,i)=>{
     const boxes=[...document.querySelectorAll(`#m${t.n} input[type=checkbox]`)];const c=boxes.filter(b=>b.checked).length;done+=c;all+=boxes.length;
-    const p=$('#pill'+t.n);p.textContent=c===boxes.length?'Done':c?`${c}/${boxes.length}`:`${t.hours} h`;p.className='pill'+(c===boxes.length?' full':c?' part':'');
+    const s=c===boxes.length?'full':c?'part':'';
+    const p=$('#pill'+t.n);p.textContent=s==='full'?'Done':c?`${c} of ${boxes.length}`:`${t.hours} h`;p.className='state '+s;
+    $('#n'+t.n).dataset.s=s;if(s==='full'&&lastFull===i-1)lastFull=i;
     $('#meta'+t.n).textContent=`${fmt(items[i].s)} – ${fmt(items[i].e)} · ${t.resources.length} resources + build`;
   });
-  const cb=[...document.querySelectorAll('#cap input')];done+=cb.filter(b=>b.checked).length;all+=cb.length;
-  $('#barfill').style.width=(100*done/all)+'%';
-  $('#progtxt').textContent=`${done} of ${all} items done · ${Math.round(100*done/all)}%`;
+  const cb=[...document.querySelectorAll('#cap input')];const cc=cb.filter(b=>b.checked).length;done+=cc;all+=cb.length;
+  const cs=cc===cb.length?'full':cc?'part':'';$('#nC').dataset.s=cs;if(cs==='full'&&lastFull===9)lastFull=10;
+  const n=document.querySelectorAll('.node');const mid=e=>e.offsetLeft+e.offsetWidth/2;const first=mid(n[0]),target=lastFull>=0?mid(n[lastFull]):first;
+  $('#fill').style.left=first+'px';$('#fill').style.width=Math.max(0,target-first)+'px';
+  $('#progtxt').textContent=`${done} of ${all} items · ${Math.round(100*done/all)}%`;
 }
-document.addEventListener('click',e=>{const a=e.target.closest('[data-open]');if(a){const d=document.getElementById(a.dataset.open);if(d){d.open=true}}});
-render();
+render();addEventListener('resize',render);
 </script>
 </body></html>
